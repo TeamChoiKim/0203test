@@ -166,10 +166,15 @@ class boardModel(BaseModel):
 
 @app.post("/boardadd")
 def boardadd(boardmodel:boardModel, request:Request):
-    token = request.cookies.get("user")
-    print(f"받은 토큰: {token}")
-    if not token:
+    uuid = request.cookies.get("user")
+    if not uuid:
         return {"status": False, "msg": "로그인 안됨"}
+    sql = f"SELECT token FROM test.login WHERE uuid = '{uuid}'"
+    login_data = findOne(sql)
+    if not login_data:
+        return {"status": False, "msg": "로그인 만료."}
+    token = login_data.get("token")
+
     try:
         info = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_email = info.get("email")
