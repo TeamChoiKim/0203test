@@ -11,20 +11,23 @@ const AuthProvider = ({ children }) => {
 
   const setAuth = (status) => {
     Cookies.set("user", status)
-    setIsLogin(status) 
+    localStorage.setItem("user", status)
+    setIsLogin(status)
   }
-  
+
   const clearAuth = () => {
     api.post("/logout")
       .then(res => {
         if (res.data.status) {
           alert(res.data.msg)
+          Cookies.remove("user")
+          localStorage.removeItem("user")
           setIsLogin(false)
           navigate("/")
         }
       })
-
   }
+
 
   const removeAuth = () => {
     clearAuth(false)
@@ -35,8 +38,14 @@ const AuthProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    if (Cookies.get("user")) setIsLogin(true)
+    const loginStatus = Cookies.get("user") || localStorage.getItem("user")
+    if (loginStatus) {
+      setIsLogin(true)
+    } else {
+      setIsLogin(false)
+    }
   }, [])
+
 
   return (
     <AuthContext.Provider value={{ isLogin, setAuth, removeAuth, clearAuth, checkAuth }}>
