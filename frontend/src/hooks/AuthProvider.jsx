@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react"
 import { useNavigate } from "react-router";
 import { api } from '@utils/network.js'
+import Cookies from 'js-cookie'
 
 export const AuthContext = createContext()
 
@@ -8,11 +9,11 @@ const AuthProvider = ({ children }) => {
   const [isLogin, setIsLogin] = useState(false)
   const navigate = useNavigate()
 
-  const setAuth = () => {
-    setIsLogin(true)
-    navigate("/")
+  const setAuth = (status) => {
+    Cookies.set("user", status)
+    setIsLogin(status) 
   }
-
+  
   const clearAuth = () => {
     api.post("/logout")
       .then(res => {
@@ -34,7 +35,7 @@ const AuthProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    if (localStorage.getItem("user")) setIsLogin(true)
+    if (Cookies.get("user")) setIsLogin(true)
   }, [])
 
   return (

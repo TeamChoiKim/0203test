@@ -14,16 +14,17 @@ const Login = () => {
 		api.post("/login", params)
 			.then(res => {
 				if (res.data.status) {
-					setAuth()
+					setAuth(true)
 					alert(res.data.msg)
+					nav('/')
 				} else {
+					setAuth(false)
 					alert(res.data.msg)
-					e.target.email.value = ""
-					e.target.pwd.value = ""
+					setEmail("")
+					setPwd("")
 				}
 			})
 			.catch(err => console.error(err))
-		setAuth()
 	}
 	return (
 		<div className="container mt-3">

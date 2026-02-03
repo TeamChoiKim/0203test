@@ -8,7 +8,6 @@ conn_params = {
   "database" : settings.mariadb_database,
   "port" : settings.mariadb_port
 }
-
 def getConn():
   try:
     conn = mariadb.connect(**conn_params)
