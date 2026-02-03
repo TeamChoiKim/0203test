@@ -160,4 +160,27 @@ def signup(response: Response,signupmodel: SignupModel):
         return {"status": True, "msg": f"회원가입에 성공했습니다. {new_user["name"]}님 안녕하세요."}
     return {"status": False, "msg": "회원 가입 중 오류가 발생했습니다."}
 
+class boardModel(BaseModel):
+    title: str
+    content: str
 
+@app.post("/boardadd")
+def boardadd(boardmodel:boardModel, request:Request):
+    token = request.cookies.get("user")
+    print(f"받은 토큰: {token}")
+    if not token:
+        return {"status": False, "msg": "로그인 안됨"}
+    try:
+        info = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_email = info.get("email")
+
+        sql =  f"""
+            INSERT INTO test.board (`user_email`,`title`,`content`)
+            VALUES ('{user_email}','{boardmodel.title}','{boardmodel.content}');
+            """
+        save(sql)
+        return {"status" : True }
+
+    except JWTError as e :
+        print(f"실패원인: {e}")
+        return {"status": False, "msg": "안되잖아"}
