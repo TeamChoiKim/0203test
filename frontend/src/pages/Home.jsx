@@ -8,12 +8,14 @@ const Home = () => {
 	const nav = useNavigate()
 
 	useEffect(() => {
-		api.get('/').then(res => {
+		api.get('/getList').then(res => {
 			if (res.data.status) setBoardList([...res.data.boardList])
 		})
 	}, [])
-	const boardClick= () => {
-		nav('/boardview')
+	const boardClick= (i) => {
+		const boardNo = {"boardNo": boardList[i]["no"]}
+		
+		nav(`/boardview/${boardNo["boardNo"]}`)
 	}
 	return (
 		<div className="container mt-3">
@@ -39,7 +41,7 @@ const Home = () => {
 					{
 						boardList.map((v, i) => {
 							return (
-								<tr className="cursor-pointer" onClick={()=>boardClick()} key={i}>
+								<tr className="cursor-pointer" onClick={()=>boardClick(i)} key={i}>
 									<td>{i+1}</td>
 									<td>{v.title}</td>
 									<td>{v.name}</td>
