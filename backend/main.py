@@ -23,6 +23,12 @@ class LoginModel(BaseModel):
     email: str
     pwd: str
 
+class SignupModel(BaseModel):
+    name: str
+    email: str
+    pwd: str
+    gender: bool
+
 def base64Decode(data):
   encoded = urllib.parse.unquote(data)
   return base64.b64decode(encoded).decode("utf-8")
@@ -82,7 +88,6 @@ def login(loginmodel: LoginModel, response: Response):
         max_age=3600,        
         expires=3600,        
         path="/",
-        # domain="localhost",
         secure=False,            # HTTPS에서만 전송
         httponly=True,          # JS 접근 차단 (⭐ 보안 중요)
         samesite="lax",         # 'lax' | 'strict' | 'none'
@@ -101,3 +106,28 @@ def logout(response: Response):
         samesite="lax",
     )
     return {"status": True, "msg": "로그아웃 완료"}
+
+@app.post("/signup")
+def signup(response: Response,signupmodel: SignupModel):
+    check_sql = settings.check_sql.replace("{email}",signupmodel.email)
+    existing_user = findOne(check_sql)
+    if existing_user:
+        return {"status": False, "msg": "이미 사용 중인 이메일입니다."}
+    sql = settings.signup_sql.replace("{name}",signupmodel.name).replace("{email}",signupmodel.email).replace("{pwd}",signupmodel.pwd).replace("{gender}",str(int(signupmodel.gender)))
+    save(sql)
+    new_user=findOne(check_sql)
+    if new_user:
+        access_token = set_token(new_user["no"], new_user["email"])
+        print(access_token)
+        response.set_cookie(
+        key="user",
+        value=access_token,
+        max_age=3600,        
+        expires=3600,        
+        path="/",
+        secure=False,            
+        httponly=True,        
+        samesite="lax",         
+      )
+        return {"status": True, "msg": f"회원가입에 성공했습니다. {new_user["name"]}님 안녕하세요."}
+    return {"status": False, "msg": "회원 가입 중 오류가 발생했습니다."}
