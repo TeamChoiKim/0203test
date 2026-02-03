@@ -10,7 +10,9 @@ class Settings(BaseSettings):
   login_sql: str = "select * from test.user where `email` = '{email}' and `password` = '{pwd}'"
   signup_sql: str = "INSERT INTO test.user (`name`,`email`,`password`,`gender`) VALUE ('{name}','{email}','{pwd}',{gender})"
   check_sql: str = "SELECT * FROM test.user where `email` = '{email}'"
-
+  get_token_sql: str = "SELECT `token` from test.login where `uuid` = '{uuid}'"
+  get_userinfo_sql: str = "SELECT `name`, `email`, `password`, `regDate`, `modDate`, `gender` FROM test.user WHERE `email` = '{email}'"
+ 
   model_config = SettingsConfigDict(
     env_file=".env",
     env_file_encoding="utf-8",

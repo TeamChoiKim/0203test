@@ -8,9 +8,8 @@ export const AuthContext = createContext()
 const AuthProvider = ({ children }) => {
   const [isLogin, setIsLogin] = useState(false)
   const navigate = useNavigate()
-
   const setAuth = (status) => {
-    Cookies.set("user", status)
+
     localStorage.setItem("user", status)
     setIsLogin(status)
   }
@@ -20,7 +19,6 @@ const AuthProvider = ({ children }) => {
       .then(res => {
         if (res.data.status) {
           alert(res.data.msg)
-          Cookies.remove("user")
           localStorage.removeItem("user")
           setIsLogin(false)
           navigate("/")
@@ -38,7 +36,7 @@ const AuthProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    const loginStatus = Cookies.get("user") || localStorage.getItem("user")
+    const loginStatus = localStorage.getItem("user")
     if (loginStatus) {
       setIsLogin(true)
     } else {
