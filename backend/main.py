@@ -56,6 +56,7 @@ def set_token(no: int, email: str):
         print(f"JWT ERROR : {e}")
     return None
 
+
 @app.get("/")
 def read_root():
     sql = f'''
