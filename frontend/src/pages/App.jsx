@@ -17,7 +17,7 @@ function App() {
     { path: "/signup", element: <SignUp /> },
     { path: "/useredit", element: <UserEdit /> },
     { path: "/userview", element: <UserView /> },
-    { path: "/boardview", element: <BoardView /> },
+    { path: "/boardview/:id", element: <BoardView /> },
     { path: "/boardedit", element: <BoardEdit /> },
     { path: "/boardadd", element: <BoardAdd /> },
   ]
