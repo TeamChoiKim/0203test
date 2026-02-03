@@ -99,6 +99,15 @@ def boardview(item : boardModel, req: Request):
     result = jwt.decode(idData["token"], SECRET_KEY, algorithms=ALGORITHM)
     return {"status": True, "boardData": data, "login": result}
 
+@app.post("/boardDel")
+def boardDel(item:boardModel):
+    sql = f'''
+    UPDATE `test`.`board`
+    SET `delYn` = 1
+    where (`no` = {item.params});
+    '''
+    save(sql)
+
 @app.post("/login")
 def login(loginmodel: LoginModel, response: Response):
     print(loginmodel)
