@@ -8,6 +8,7 @@ class Settings(BaseSettings):
   mariadb_port: int
   react_url: str
   login_sql: str = "select * from test.user where `email` = '{email}' and `password` = '{pwd}'"
+  
 
   model_config = SettingsConfigDict(
     env_file=".env",

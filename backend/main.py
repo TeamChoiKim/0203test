@@ -21,7 +21,7 @@ app.add_middleware(
 
 class LoginModel(BaseModel):
     email: str
-    password: str
+    pwd: str
 
 def base64Decode(data):
   encoded = urllib.parse.unquote(data)
@@ -46,12 +46,12 @@ def set_token(no: int, email: str):
         token = jwt.encode(data, SECRET_KEY, ALGORITHM)
         sql = f'''
             INSERT INTO test.login
-            (`no`,`uuid`,`token`)
+            (`uuid`,`token`)
             VALUE
-            ('{no}','{id}','{token}')
+            ('{id}','{token}')
             ;
             '''
-        if save(sql): return id
+        if save(sql): return token
     except JWTError as e:
         print(f"JWT ERROR : {e}")
     return None
@@ -69,9 +69,10 @@ def read_root():
 
     return {"status": True, "boardList" : data}
 
+
 @app.post("/login")
 def login(loginmodel: LoginModel, response: Response):
-    sql = settings.login_sql.replace("{email}", loginmodel.email).replace("{pwd}", loginmodel.password)
+    sql = settings.login_sql.replace("{email}", loginmodel.email).replace("{pwd}", loginmodel.pwd)
     data = findOne(sql)
     if data:
         access_token = set_token(data["no"], data["email"])
@@ -82,11 +83,48 @@ def login(loginmodel: LoginModel, response: Response):
         max_age=3600,        
         expires=3600,        
         path="/",
-        domain="localhost",
-        secure=True,            # HTTPS에서만 전송
+        # domain="localhost",
+        secure=False,            # HTTPS에서만 전송
         httponly=True,          # JS 접근 차단 (⭐ 보안 중요)
         samesite="lax",         # 'lax' | 'strict' | 'none'
       )
-        return {"status": True}
+        return {"status": True, "msg": f"{data["name"]}님 안녕하세요."}
     else: 
-        return {"status": False}
+        return {"status": False, "msg": "로그인 실패"}
+    
+@app.post("/logout")
+def logout(response: Response):
+    response.delete_cookie(
+        key="user",
+        path="/",
+        secure=False,  
+        httponly=True,
+        samesite="lax",
+    )
+    return {"status": True, "msg": "로그아웃 완료"}
+
+    
+class boardModel(BaseModel):
+    title: str
+    content: str
+
+@app.post("/boardadd")
+def boardadd(boardmodel:boardModel, request:Request):
+    token = request.cookies.get("user")
+    print(f"받은 토큰: {token}")
+    if not token:
+        return {"status": False, "msg": "로그인 안됨"}
+    try:
+        info = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_email = info.get("email")
+
+        sql =  f"""
+            INSERT INTO test.board (`user_email`,`title`,`content`)
+            VALUES ('{user_email}','{boardmodel.title}','{boardmodel.content}');
+            """
+        save(sql)
+        return {"status" : True }
+
+    except JWTError as e :
+        print(f"실패원인: {e}")
+        return {"status": False, "msg": "안되잖아"}
