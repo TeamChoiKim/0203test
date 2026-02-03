@@ -65,12 +65,11 @@ def read_root():
     on(b.`user_email` = u.email);
     '''
     data = findAll(sql)
-    print(data)
-
     return {"status": True, "boardList" : data}
 
 @app.post("/login")
 def login(loginmodel: LoginModel, response: Response):
+    print(loginmodel)
     sql = settings.login_sql.replace("{email}", loginmodel.email).replace("{pwd}", loginmodel.pwd)
     data = findOne(sql)
     if data:
@@ -91,6 +90,8 @@ def login(loginmodel: LoginModel, response: Response):
     else: 
         return {"status": False, "msg": "로그인 실패"}
     
+
+
 @app.post("/logout")
 def logout(response: Response):
     response.delete_cookie(
