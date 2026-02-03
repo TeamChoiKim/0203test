@@ -7,7 +7,6 @@ export const AuthContext = createContext()
 const AuthProvider = ({ children }) => {
   const [isLogin, setIsLogin] = useState(false)
   const navigate = useNavigate()
-
   const setAuth = (status) => {
     localStorage.setItem("user", status)
     setIsLogin(status)

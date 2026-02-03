@@ -5,8 +5,6 @@ from db import findOne, findAll, save
 from settings import settings
 from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
-import urllib.parse
-import base64
 import uuid
 
 
@@ -28,10 +26,6 @@ class SignupModel(BaseModel):
     email: str
     pwd: str
     gender: bool
-
-def base64Decode(data):
-  encoded = urllib.parse.unquote(data)
-  return base64.b64decode(encoded).decode("utf-8")
 
 SECRET_KEY="your-extremely-secure-random-secret-key"
 ALGORITHM="HS256"
@@ -210,6 +204,23 @@ def boardadd(boardmodel:boardModel, request:Request):
     except JWTError as e :
         print(f"실패원인: {e}")
         return {"status": False, "msg": "안되잖아"}
+
+@app.get("/me")
+def get_me(request: Request):
+    user_uuid = request.cookies.get("user")
+    if not user_uuid:
+        return {"status": False, "msg": "로그인이 필요합니다."}
+    try:
+        sql = settings.get_token_sql.replace("{uuid}",user_uuid)
+        token = findOne(sql)
+        decoded_data = jwt.decode(token["token"], SECRET_KEY, ALGORITHM)
+        sql = settings.get_userinfo_sql.replace("{email}",decoded_data["email"])
+        userinfo = findOne(sql)
+        return {"status": True, "name": userinfo["name"], "email": userinfo["email"], "password": userinfo["password"], "gender": userinfo["gender"], "regDate": userinfo["regDate"], "modDate": userinfo["modDate"]}
+    except Exception as e:
+        print(f"Decode Error: {e}")
+        return {"status": False, "msg": "유효하지 않은 세션입니다."}
+    
     
 @app.post("/username")
 def name(request:Request):
