@@ -4,34 +4,37 @@ import { api } from '@utils/network.js'
 
 export const AuthContext = createContext()
 
-const AuthProvider = ({children}) => {
+const AuthProvider = ({ children }) => {
   const [isLogin, setIsLogin] = useState(false)
   const navigate = useNavigate()
 
-  const setAuth = status => {
-    cookieStore.setItem("user", status)
-    // db에 회원정보 넣기
-    setIsLogin(status)
+  const setAuth = () => {
+    setIsLogin(true)
     navigate("/")
   }
 
   const clearAuth = () => {
-    cookieStore.removeItem("user")
-    setIsLogin(false)
-    navigate("/")
+    api.post("/logout")
+      .then(res => {
+        if (res.data.status) {
+          alert(res.data.msg)
+          setIsLogin(false)
+          navigate("/")
+        }
+      })
+
   }
 
   const removeAuth = () => {
-    clearAuth()
+    clearAuth(false)
   }
 
   const checkAuth = () => {
-    return cookieStore.getItem("user") ? true : false
-    //db에 맞는 user정보가 있으면 true
+    return localStorage.getItem("user") ? true : false
   }
 
   useEffect(() => {
-    if(localStorage.getItem("user")) setIsLogin(true)
+    if (localStorage.getItem("user")) setIsLogin(true)
   }, [])
 
   return (

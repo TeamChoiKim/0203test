@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router"
-import { useAuth } from "../hooks/AuthProvider"
+import { useAuth } from "@hooks/AuthProvider.jsx"
 
 const Nav = () => {
 
 	const nav = useNavigate()
-	const { checkAuth } = useAuth()
+	const { isLogin, clearAuth } = useAuth()
 
 
 	return (
@@ -16,15 +16,28 @@ const Nav = () => {
 				</button>
 				<div className="collapse navbar-collapse" id="navbarNav">
 					<ul className="navbar-nav">
-						<li className="nav-item">
-							<button className="nav-link" onClick={() => nav('/login')} >{checkAuth ? '로그인' : '로그아웃'}</button>
-						</li>
-						<li className="nav-item">
-							<button className="nav-link" onClick={()=>nav('/signup')}>회원가입</button>
-						</li>
-						{/* <li className="nav-item">
-							<a className="nav-link" href="./user/user_view.html">회원정보</a>
-						</li> */}
+						{
+							!isLogin &&
+							<>
+								<li className="nav-item">
+									<button type="button" className="nav-link" onClick={() => nav("/login")}>로그인</button>
+								</li>
+								<li className="nav-item">
+									<button type="button" className="nav-link" onClick={() => nav("/signup")}>회원가입</button>
+								</li>
+							</>
+						}
+						{
+							isLogin &&
+							<>
+								<li className="nav-item">
+									<button type="button" className="nav-link" onClick={() => clearAuth()} >로그아웃</button>
+								</li>
+								<li className="nav-item">
+									<button type="button" className="nav-link" onClick={() => nav("/userview")}>회원정보</button>
+								</li>
+							</>
+						}
 					</ul>
 				</div>
 			</div>
