@@ -88,7 +88,7 @@ def boardview(item : boardModel, req: Request):
     '''
     data = findOne(sql)
 
-    uuid = req.cookies.get('user')\
+    uuid = req.cookies.get('user')
     
     log_sql = f'''
     select `token` from `test`.`login`
