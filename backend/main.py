@@ -21,7 +21,7 @@ app.add_middleware(
 
 class LoginModel(BaseModel):
     email: str
-    password: str
+    pwd: str
 
 def base64Decode(data):
   encoded = urllib.parse.unquote(data)
@@ -46,9 +46,9 @@ def set_token(no: int, email: str):
         token = jwt.encode(data, SECRET_KEY, ALGORITHM)
         sql = f'''
             INSERT INTO test.login
-            (`no`,`uuid`,`token`)
+            (`uuid`,`token`)
             VALUE
-            ('{no}','{id}','{token}')
+            ('{id}','{token}')
             ;
             '''
         if save(sql): return id
@@ -71,7 +71,7 @@ def read_root():
 
 @app.post("/login")
 def login(loginmodel: LoginModel, response: Response):
-    sql = settings.login_sql.replace("{email}", loginmodel.email).replace("{pwd}", loginmodel.password)
+    sql = settings.login_sql.replace("{email}", loginmodel.email).replace("{pwd}", loginmodel.pwd)
     data = findOne(sql)
     if data:
         access_token = set_token(data["no"], data["email"])
@@ -82,11 +82,22 @@ def login(loginmodel: LoginModel, response: Response):
         max_age=3600,        
         expires=3600,        
         path="/",
-        domain="localhost",
-        secure=True,            # HTTPS에서만 전송
+        # domain="localhost",
+        secure=False,            # HTTPS에서만 전송
         httponly=True,          # JS 접근 차단 (⭐ 보안 중요)
         samesite="lax",         # 'lax' | 'strict' | 'none'
       )
-        return {"status": True}
+        return {"status": True, "msg": f"{data["name"]}님 안녕하세요."}
     else: 
-        return {"status": False}
+        return {"status": False, "msg": "로그인 실패"}
+    
+@app.post("/logout")
+def logout(response: Response):
+    response.delete_cookie(
+        key="user",
+        path="/",
+        secure=False,  
+        httponly=True,
+        samesite="lax",
+    )
+    return {"status": True, "msg": "로그아웃 완료"}
