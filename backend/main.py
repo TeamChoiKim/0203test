@@ -87,7 +87,12 @@ def login(loginmodel: LoginModel, response: Response):
         httponly=True,          # JS 접근 차단 (⭐ 보안 중요)
         samesite="lax",         # 'lax' | 'strict' | 'none'
       )
+<<<<<<< HEAD
         return {"status": True, "msg": f"{data["name"]}님 안녕하세요."}
+=======
+        print(data, type(data))
+        return {"status": True}
+>>>>>>> f50e726 (AuthProvide 변경)
     else: 
         return {"status": False, "msg": "로그인 실패"}
     
