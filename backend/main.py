@@ -183,18 +183,38 @@ def boardadd(boardmodel:boardModel, request:Request):
     if not login_data:
         return {"status": False, "msg": "로그인 만료."}
     token = login_data.get("token")
-
     try:
         info = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_email = info.get("email")
-
         sql =  f"""
             INSERT INTO test.board (`user_email`,`title`,`content`)
             VALUES ('{user_email}','{boardmodel.title}','{boardmodel.content}');
             """
         save(sql)
-        return {"status" : True }
+        return {"status" : True}
 
+    except JWTError as e :
+        print(f"실패원인: {e}")
+        return {"status": False, "msg": "안되잖아"}
+    
+@app.post("/username")
+def name(request:Request):
+    uuid = request.cookies.get("user")
+    if not uuid:
+        return {"status": False, "msg": "로그인 안됨"}
+    sql = f"SELECT token FROM test.login WHERE uuid = '{uuid}'"
+    data = findOne(sql)
+    if not data:
+        return {"status": False, "msg": "유효하지 않은 세션"}
+    token = data.get("token")
+    try:
+        info = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_email = info.get("email")
+        sql = f"select name from test.user where email = '{user_email}'"
+        username = findOne(sql)
+        if not username:
+            return {"status": False, "msg": "사용자 정보 없음"}
+        return {"status" : True, "name": username["name"] }
     except JWTError as e :
         print(f"실패원인: {e}")
         return {"status": False, "msg": "안되잖아"}

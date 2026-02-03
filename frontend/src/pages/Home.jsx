@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react"
 import { api } from '@utils/network.js'
 import { useNavigate } from "react-router"
+import { useAuth } from "@hooks/AuthProvider.jsx"
 
 
 const Home = () => {
 	const [boardList, setBoardList] = useState([])
 	const nav = useNavigate()
+	const { isLogin, clearAuth } = useAuth()
+	
 
 	useEffect(() => {
 		api.get('/getList').then(res => {
@@ -22,8 +25,10 @@ const Home = () => {
 			<h1 className="display-1 text-center">게시판</h1>
 			<div className="d-flex justify-content-between align-items-center mt-4">
 				<div className="btn-group">
-					<button type="button" onClick={()=>{nav("/boardadd")}} className="btn btn-primary">게시글 작성</button>
-				</div>
+					{ isLogin &&
+					<button type="button" onClick={()=>nav("/boardadd")} className="btn btn-primary">게시글 작성</button>
+					}
+					</div>
 				<form className="d-flex">
 					<input className="form-control me-2" type="search" placeholder="검색어를 입력하세요" />
 					<button className="btn btn-outline-dark" type="submit">Search</button>
