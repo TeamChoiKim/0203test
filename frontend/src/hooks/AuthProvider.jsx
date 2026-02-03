@@ -9,13 +9,14 @@ const AuthProvider = ({children}) => {
   const navigate = useNavigate()
 
   const setAuth = status => {
-    localStorage.setItem("user", status)
+    cookieStore.setItem("user", status)
+    // db에 회원정보 넣기
     setIsLogin(status)
     navigate("/")
   }
 
   const clearAuth = () => {
-    localStorage.removeItem("user")
+    cookieStore.removeItem("user")
     setIsLogin(false)
     navigate("/")
   }
@@ -25,7 +26,8 @@ const AuthProvider = ({children}) => {
   }
 
   const checkAuth = () => {
-    return localStorage.getItem("user") ? true : false
+    return cookieStore.getItem("user") ? true : false
+    //db에 맞는 user정보가 있으면 true
   }
 
   useEffect(() => {
