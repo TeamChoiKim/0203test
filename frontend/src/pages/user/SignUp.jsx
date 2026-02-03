@@ -1,15 +1,15 @@
 import { useNavigate } from "react-router"
-import { useAuth } from "../../hooks/AuthProvider"
+// import { useAuth } from "../../hooks/AuthProvider"
 import { useState } from "react"
 
 
 const SignUp = () => {
     const nav = useNavigate()
-    const {setAuth} = useAuth()
+    // const {setAuth} = useAuth()
     const submitEvent = () => {
         //db에 회원정보 추가
         //+ 자동로그인 후에
-        setAuth(true)
+        // setAuth(true)
         nav('/')
     }
     const [name, setName] = useState('')
