@@ -95,7 +95,6 @@ def boardview(item : boardModel, req: Request):
     where `test`.`login`.`uuid` = '{uuid}'
     '''
     idData = findOne(log_sql)
-    print(idData)
     result = jwt.decode(idData["token"], SECRET_KEY, algorithms=ALGORITHM)
     return {"status": True, "boardData": data, "login": result}
 
@@ -107,6 +106,21 @@ def boardDel(item:boardModel):
     where (`no` = {item.params});
     '''
     save(sql)
+
+class boardEditModel(BaseModel):
+    params: str = Field(..., title="게시글 번호") 
+    title: str = Field(..., title="제목")
+    content: str = Field(..., title="내용")
+   
+@app.post("/boardedit")
+def boardedit(item:boardEditModel):
+    sql = f'''
+    UPDATE `test`.`board`
+    SET `title` = '{item.title}', `content` = '{item.content}'
+    where (`no` = {item.params});
+    '''
+    save(sql)
+    return {"status": True, "data": item}
 
 @app.post("/login")
 def login(loginmodel: LoginModel, response: Response):
