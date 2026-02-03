@@ -1,13 +1,28 @@
-const Home = () => {
+import { useEffect, useState } from "react"
+import { api } from '@utils/network.js'
+import { useNavigate } from "react-router"
 
-    return( 
-        <div className="container mt-3">
+
+const Home = () => {
+	const [boardList, setBoardList] = useState([])
+	const nav = useNavigate()
+
+	useEffect(() => {
+		api.get('/').then(res => {
+			if (res.data.status) setBoardList([...res.data.boardList])
+		})
+	}, [])
+	const boardClick= () => {
+		nav('/boardview')
+	}
+	return (
+		<div className="container mt-3">
 			<h1 className="display-1 text-center">게시판</h1>
 			<div className="d-flex justify-content-between align-items-center mt-4">
 				<div className="btn-group">
 					<a href="./board/board_add.html" className="btn btn-primary">게시글 작성</a>
 				</div>
-				<form className="d-flex" style={{"maxWidth": "300px"}}>
+				<form className="d-flex">
 					<input className="form-control me-2" type="search" placeholder="검색어를 입력하세요" />
 					<button className="btn btn-outline-dark" type="submit">Search</button>
 				</form>
@@ -21,26 +36,17 @@ const Home = () => {
 					</tr>
 				</thead>
 				<tbody>
-					<tr className="cursor-pointer" onClick="location.href ='./board/board_view.html';">
-						<td>1</td>
-						<td>샘플을 만들었어요</td>
-						<td>이나라</td>
-					</tr>
-					<tr className="cursor-pointer" onClick="location.href = './board/board_view.html';">
-						<td>2</td>
-						<td>샘플을 만들어 영원히</td>
-						<td>남영준</td>
-					</tr>
-					<tr className="cursor-pointer" onClick="location.href = './board/board_view.html';">
-						<td>3</td>
-						<td>여름이었다...☆</td>
-						<td>조윤주</td>
-					</tr>
-					<tr className="cursor-pointer" onClick="location.href = './board/board_view.html';">
-						<td>4</td>
-						<td>이것 뭐에요?</td>
-						<td>이채훈</td>
-					</tr>
+					{
+						boardList.map((v, i) => {
+							return (
+								<tr className="cursor-pointer" onClick={()=>boardClick()} key={i}>
+									<td>{i+1}</td>
+									<td>{v.title}</td>
+									<td>{v.name}</td>
+								</tr>
+							)
+						})
+					}
 				</tbody>
 			</table>
 
@@ -63,7 +69,7 @@ const Home = () => {
 				</ul>
 			</nav>
 		</div>
-    )
+	)
 }
 
 export default Home

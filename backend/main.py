@@ -58,7 +58,16 @@ def set_token(no: int, email: str):
 
 @app.get("/")
 def read_root():
-    return {"status" : True}
+    sql = f'''
+    select b.`no`, b.`title`, u.`name`
+    from `test`.`board` as b
+    inner Join `test`.`user` as u
+    on(b.`user_email` = u.email);
+    '''
+    data = findAll(sql)
+    print(data)
+
+    return {"status": True, "boardList" : data}
 
 @app.post("/login")
 def login(loginmodel: LoginModel, response: Response):
