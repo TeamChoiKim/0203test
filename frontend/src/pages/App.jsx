@@ -18,7 +18,7 @@ function App() {
     { path: "/useredit", element: <UserEdit /> },
     { path: "/userview", element: <UserView /> },
     { path: "/boardview/:id", element: <BoardView /> },
-    { path: "/boardedit", element: <BoardEdit /> },
+    { path: "/boardedit/:id", element: <BoardEdit /> },
     { path: "/boardadd", element: <BoardAdd /> },
   ]
 

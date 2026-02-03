@@ -29,11 +29,22 @@ const BoardView = () => {
 
 	const modClick = () => {
 		if(modAcc){
-			nav("/boardedit")
+			nav(`/boardedit/${param}`)
 		}else{
-			alert("수정 권한이 없습니다")
+			alert("편집 권한이 없습니다")
 		}
 	}
+
+	const delClick = () =>{
+		if(modAcc){
+		api.post(`/boardDel`, params)
+		alert("삭제되었습니다")
+		nav('/')
+		}else{
+			alert("편집 권한이 없습니다")
+		}
+	}
+	
 
 	return (
 		<div className="container mt-3">
@@ -54,13 +65,13 @@ const BoardView = () => {
 			</form>
 			<div className="d-flex">
 				<div className="p-2 flex-fill d-grid">
-					<button onClick={() => modClick()} className="btn btn-primary">수정</button>
+					<button type="button" onClick={() => modClick()} className="btn btn-primary">수정</button>
 				</div>
 				<div className="p-2 flex-fill d-grid">
-					<button className="btn btn-primary">삭제</button>
+					<button type="button" onClick={() => delClick()} className="btn btn-primary">삭제</button>
 				</div>
 				<div className="p-2 flex-fill d-grid">
-					<button className="btn btn-primary">취소</button>
+					<button type="button" onClick={() => nav('/')} className="btn btn-primary">취소</button>
 				</div>
 			</div>
 		</div>
