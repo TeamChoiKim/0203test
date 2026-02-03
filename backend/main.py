@@ -1,6 +1,83 @@
-def main():
-    print("Hello from backend!")
+from fastapi import FastAPI, Response, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from db import findOne, findAll, save
+from settings import settings
+from datetime import datetime, timedelta, timezone
+from jose import jwt, JWTError
+import urllib.parse
+import base64
+import uuid
 
 
-if __name__ == "__main__":
-    main()
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.react_url,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+class LoginModel(BaseModel):
+    email: str
+    password: str
+
+def base64Decode(data):
+  encoded = urllib.parse.unquote(data)
+  return base64.b64decode(encoded).decode("utf-8")
+
+SECRET_KEY="your-extremely-secure-random-secret-key"
+ALGORITHM="HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
+def set_token(no: int, email: str):
+    try:
+        iat = datetime.now(timezone.utc) + (timedelta(hours=7))         # Claim설정
+        exp = iat + (timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+        data = {
+            "email": email,
+            "iss": "EDU",
+            "sub": str(no),
+            "iat": iat,
+            "exp": exp
+        }
+        id = uuid.uuid4().hex
+        token = jwt.encode(data, SECRET_KEY, ALGORITHM)
+        sql = f'''
+            INSERT INTO test.login
+            (`no`,`uuid`,`token`)
+            VALUE
+            ('{no}','{id}','{token}')
+            ;
+            '''
+        if save(sql): return id
+    except JWTError as e:
+        print(f"JWT ERROR : {e}")
+    return None
+
+@app.get("/")
+def read_root():
+    return {"status" : True}
+
+@app.post("/login")
+def login(loginmodel: LoginModel, response: Response):
+    sql = settings.login_sql.replace("{email}", loginmodel.email).replace("{pwd}", loginmodel.password)
+    data = findOne(sql)
+    if data:
+        access_token = set_token(data["no"], data["email"])
+        print(access_token)
+        response.set_cookie(
+        key="user",
+        value=access_token,
+        max_age=3600,        
+        expires=3600,        
+        path="/",
+        domain="localhost",
+        secure=True,            # HTTPS에서만 전송
+        httponly=True,          # JS 접근 차단 (⭐ 보안 중요)
+        samesite="lax",         # 'lax' | 'strict' | 'none'
+      )
+        return {"status": True}
+    else: 
+        return {"status": False}
