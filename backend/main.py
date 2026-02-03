@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Response, Request
+from fastapi import FastAPI, Response, Request, Form
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from db import findOne, findAll, save
 from settings import settings
 from datetime import datetime, timedelta, timezone
@@ -62,21 +62,46 @@ def set_token(no: int, email: str):
         print(f"JWT ERROR : {e}")
     return None
 
-@app.get("/")
+@app.get("/getList")
 def read_root():
     sql = f'''
     select b.`no`, b.`title`, u.`name`
     from `test`.`board` as b
     inner Join `test`.`user` as u
-    on(b.`user_email` = u.email);
+    on(b.`user_email` = u.email)
+    where b.`delYn` = 0;
     '''
     data = findAll(sql)
-    print(data)
-
     return {"status": True, "boardList" : data}
+
+class boardModel(BaseModel):
+    params:str = Field(..., title="게시글넘버", description="게시글넘버 입니다.")
+
+@app.post("/boardview")
+def boardview(item : boardModel, req: Request):
+    sql = f'''
+    select b.`title`, u.`name`, b.`content`, b.`user_email`
+    from `test`.`board` as b
+    inner Join `test`.`user` as u
+    on(b.`user_email` = u.email)
+    where (b.`no` = {item.params});
+    '''
+    data = findOne(sql)
+
+    uuid = req.cookies.get('user')\
+    
+    log_sql = f'''
+    select `token` from `test`.`login`
+    where `test`.`login`.`uuid` = '{uuid}'
+    '''
+    idData = findOne(log_sql)
+    print(idData)
+    result = jwt.decode(idData["token"], SECRET_KEY, algorithms=ALGORITHM)
+    return {"status": True, "boardData": data, "login": result}
 
 @app.post("/login")
 def login(loginmodel: LoginModel, response: Response):
+    print(loginmodel)
     sql = settings.login_sql.replace("{email}", loginmodel.email).replace("{pwd}", loginmodel.pwd)
     data = findOne(sql)
     if data:
@@ -96,6 +121,8 @@ def login(loginmodel: LoginModel, response: Response):
     else: 
         return {"status": False, "msg": "로그인 실패"}
     
+
+
 @app.post("/logout")
 def logout(response: Response):
     response.delete_cookie(
@@ -105,6 +132,7 @@ def logout(response: Response):
         httponly=True,
         samesite="lax",
     )
+
     return {"status": True, "msg": "로그아웃 완료"}
 
 @app.post("/signup")
@@ -131,3 +159,5 @@ def signup(response: Response,signupmodel: SignupModel):
       )
         return {"status": True, "msg": f"회원가입에 성공했습니다. {new_user["name"]}님 안녕하세요."}
     return {"status": False, "msg": "회원 가입 중 오류가 발생했습니다."}
+
+
