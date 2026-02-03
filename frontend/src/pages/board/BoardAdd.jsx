@@ -6,20 +6,18 @@ import { useEffect } from 'react'
 const BoardAdd = ()=>{
 	const nav = useNavigate()
 	const [userName, setUserName] = useState("")
-
 	useEffect(() => {
-        const user = localStorage.getItem("userName") 
-        if (user) {
-            setUserName(user)
-        }
-    }, [])
+		api.post('/username').then(res => {
+			if (res.data.name) setUserName(res.data.name)
+		})
+	}, [])
 
 	const submitEvent = e => {
 		e.preventDefault()
 		const title = e.target.title.value
 		const content = e.target.content.value
 		api.post('/boardadd', {title: title, content: content})
-		.then(res => console.log("성공", res))
+		.then(res => console.log("성공", res), nav("/"))
 		.catch(err => console.log("실패", err))
 	}
 
@@ -33,7 +31,7 @@ const BoardAdd = ()=>{
 				</div>
 				<div className="mb-3 mt-3">
 					<label htmlFor="name" className="form-label">작성자</label>
-					<input type="text" className="form-control" id="name" value={userName} name="name" disabled/>
+					<input type="text" className="form-control" id="name" value={userName} disabled/>
 				</div>
 				<div className="mb-3 mt-3">
 					<label htmlFor="content" className="form-label">내용</label>

@@ -1,31 +1,65 @@
-const BoardEdit = ()=>{
-    return(
-        <div className="container mt-3">
+import { useEffect, useState } from "react"
+import { api } from '@utils/network.js'
+import { useParams } from "react-router"
+import { useAuth } from "@hooks/AuthProvider.jsx"
+import { useNavigate } from "react-router"
+
+
+const BoardEdit = () => {
+
+	const nav = useNavigate()
+	const [title, setTitle] = useState("")
+	const [name, setName] = useState("")
+	const [modContent, setModContent] = useState("")
+	const param = useParams().id
+	
+	const params = { "params": param }
+	
+	useEffect(() => {
+		api.post(`/boardview`, params).then(res => {
+			setTitle(res.data.boardData.title)
+			setName(res.data.boardData.name)
+			setModContent(res.data.boardData.content)
+		}).catch(err => console.log(err))
+	}, [])
+
+	const submitEvent = (e) => {
+		e.preventDefault()
+		const paramData = {"params": param, "title": title, "content": modContent}
+		api.post('/boardedit', paramData).then(res => {
+			console.log(res.data)
+		}).catch(err => console.log(err))
+		alert("수정되었습니다")
+		nav('/')
+	}
+
+	return (
+		<div className="container mt-3">
 			<h1 className="display-1 text-center">게시글 수정</h1>
-			<form>
+			<form onSubmit={submitEvent}>
 				<div className="mb-3 mt-3">
 					<label htmlFor="title" className="form-label">제목</label>
-					<input type="text" className="form-control" id="title" placeholder="제목을 입력하세요." name="title"/>
+					<input type="text" className="form-control" id="title" value={title} placeholder="제목을 입력하세요." name="title" onChange={e=>setTitle(e.target.value)}/>
 				</div>
 				<div className="mb-3 mt-3">
 					<label htmlFor="name" className="form-label">작성자</label>
-					<input type="text" className="form-control" id="name" name="name" disabled/>
+					<input type="text" className="form-control" id="name" name="name" readOnly={true} value={name}/>
 				</div>
 				<div className="mb-3 mt-3">
 					<label htmlFor="content" className="form-label">내용</label>
-					<textarea type="text" className="form-control h-50" rows="10" placeholder="내용을 입력하세요." name="content"></textarea>
+					<textarea type="text" className="form-control h-50" rows="10" placeholder="내용을 입력하세요." name="content" value={modContent} onChange={e=>setModContent(e.target.value)}></textarea>
 				</div>
 				<div className="d-flex">
 					<div className="p-2 flex-fill d-grid">
-						<a href="./board_view.html" className="btn btn-primary">저장</a>
+						<button type="submit" className="btn btn-primary">저장</button>
 					</div>
 					<div className="p-2 flex-fill d-grid">
-						<a href="./board_view.html" className="btn btn-primary">취소</a>
+						<button type="button" onClick={()=>nav('/')} className="btn btn-primary">취소</button>
 					</div>
 				</div>
 			</form>
 		</div>
-    )
+	)
 }
 
 export default BoardEdit

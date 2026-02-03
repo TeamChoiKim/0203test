@@ -89,7 +89,6 @@ def boardview(item : boardModel, req: Request):
     where `test`.`login`.`uuid` = '{uuid}'
     '''
     idData = findOne(log_sql)
-    print(idData)
     result = jwt.decode(idData["token"], SECRET_KEY, algorithms=ALGORITHM)
     return {"status": True, "boardData": data, "login": result}
 
@@ -101,6 +100,21 @@ def boardDel(item:boardModel):
     where (`no` = {item.params});
     '''
     save(sql)
+
+class boardEditModel(BaseModel):
+    params: str = Field(..., title="게시글 번호") 
+    title: str = Field(..., title="제목")
+    content: str = Field(..., title="내용")
+   
+@app.post("/boardedit")
+def boardedit(item:boardEditModel):
+    sql = f'''
+    UPDATE `test`.`board`
+    SET `title` = '{item.title}', `content` = '{item.content}'
+    where (`no` = {item.params});
+    '''
+    save(sql)
+    return {"status": True, "data": item}
 
 @app.post("/login")
 def login(loginmodel: LoginModel, response: Response):
@@ -177,17 +191,15 @@ def boardadd(boardmodel:boardModel, request:Request):
     if not login_data:
         return {"status": False, "msg": "로그인 만료."}
     token = login_data.get("token")
-
     try:
         info = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_email = info.get("email")
-
         sql =  f"""
             INSERT INTO test.board (`user_email`,`title`,`content`)
             VALUES ('{user_email}','{boardmodel.title}','{boardmodel.content}');
             """
         save(sql)
-        return {"status" : True }
+        return {"status" : True}
 
     except JWTError as e :
         print(f"실패원인: {e}")
@@ -209,3 +221,25 @@ def get_me(request: Request):
         print(f"Decode Error: {e}")
         return {"status": False, "msg": "유효하지 않은 세션입니다."}
     
+    
+@app.post("/username")
+def name(request:Request):
+    uuid = request.cookies.get("user")
+    if not uuid:
+        return {"status": False, "msg": "로그인 안됨"}
+    sql = f"SELECT token FROM test.login WHERE uuid = '{uuid}'"
+    data = findOne(sql)
+    if not data:
+        return {"status": False, "msg": "유효하지 않은 세션"}
+    token = data.get("token")
+    try:
+        info = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_email = info.get("email")
+        sql = f"select name from test.user where email = '{user_email}'"
+        username = findOne(sql)
+        if not username:
+            return {"status": False, "msg": "사용자 정보 없음"}
+        return {"status" : True, "name": username["name"] }
+    except JWTError as e :
+        print(f"실패원인: {e}")
+        return {"status": False, "msg": "안되잖아"}
