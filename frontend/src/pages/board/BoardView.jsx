@@ -17,14 +17,16 @@ const BoardView = () => {
 
 	useEffect(() => {
 		if (!isLogin) {
+			alert("로그인이 필요합니다.")
 			nav('/login')
-		}
+		}else{
 		api.post(`/boardview`, params).then(res => {
 			const boardEmail = res.data.boardData.user_email
 			const userEmail = res.data.login.email
 			if(boardEmail === userEmail ) setModAcc(true)
 			setContent(res.data.boardData)
 		}).catch(err => console.log(err))
+		}
 	}, [])
 
 	const modClick = () => {

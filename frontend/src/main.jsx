@@ -9,7 +9,6 @@ import { CookiesProvider } from 'react-cookie'
 import AuthProvider from '@hooks/AuthProvider.jsx'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
     <CookiesProvider defaultSetOptions={{ path: '/' }}>
       <BrowserRouter>
         <AuthProvider>
@@ -17,5 +16,4 @@ createRoot(document.getElementById('root')).render(
         </AuthProvider>
       </BrowserRouter>
     </CookiesProvider>
-  </StrictMode>
 )

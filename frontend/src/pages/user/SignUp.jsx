@@ -16,8 +16,9 @@ const SignUp = () => {
         api.post("/signup", params)
             .then(res=>{
                 if (res.data.status) {
-                    setAuth()
+                    setAuth(true)
                     alert(res.data.msg)
+                    nav('/')
                 } else {
                     alert(res.data.msg)
                 }

@@ -37,6 +37,7 @@ const Home = () => {
 	const [boardList, setBoardList] = useState([])
 	const [page, setPage] = useState(1)
 	const nav = useNavigate()
+	const [search, setSearch] = useState("")
 	const { checkAuth } = useAuth()
 	const pagingEvent = (index) => {
 		setPage(index)
@@ -59,6 +60,21 @@ const Home = () => {
 			nav('/login')
 		}
 	}
+
+
+	const searchEvent = (e)=>{
+        e.preventDefault()
+        if(search){
+            const searchParams = {"search":search}
+            api.post('/searchList',searchParams).then(res => {
+            if (res.data.status) setBoardList([...res.data.boardList])
+        })
+        }else{
+            api.get('/getList').then(res => {
+            if (res.data.status) setBoardList([...res.data.boardList])
+        })
+        }
+    }
 	return (
 		<div className="container mt-3">
 			<h1 className="display-1 text-center">게시판</h1>
@@ -66,8 +82,8 @@ const Home = () => {
 				<div className="btn-group">
 					<button type="button" onClick={boardAddButton} className="btn btn-primary">게시글 작성</button>
 				</div>
-				<form className="d-flex">
-					<input className="form-control me-2" type="search" placeholder="검색어를 입력하세요" />
+				<form className="d-flex" onSubmit={searchEvent}>
+					<input className="form-control me-2" type="search" placeholder="검색어를 입력하세요" value={search} onChange={e=>setSearch(e.target.value)}/>
 					<button className="btn btn-outline-dark" type="submit">Search</button>
 				</form>
 			</div>

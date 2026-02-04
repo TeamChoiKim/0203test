@@ -45,7 +45,7 @@ const Login = () => {
 						<button className="btn btn-primary" type="submit">로그인</button>
 					</div>
 					<div className="p-2 flex-fill d-grid">
-						<a href="../index.html" className="btn btn-primary">취소</a>
+						<button type="button" onClick={()=>nav('/')} className="btn btn-primary">취소</button>
 					</div>
 				</div>
 			</form>
