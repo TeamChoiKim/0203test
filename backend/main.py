@@ -11,7 +11,7 @@ import uuid
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.react_url,
+    allow_origins="http://192.168.0.168:5173",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -67,6 +67,7 @@ def read_root():
     '''
     data = findAll(sql)
     return {"status": True, "boardList" : data}
+
 
 class boardModel(BaseModel):
     params:str = Field(..., title="게시글넘버", description="게시글넘버 입니다.")
@@ -217,7 +218,7 @@ def get_me(request: Request):
         sql = settings.get_userinfo_sql.replace("{email}",decoded_data["email"])
         userinfo = findOne(sql)
         return {"status": True, "name": userinfo["name"], "email": userinfo["email"], "password": userinfo["password"], "gender": userinfo["gender"], "regDate": userinfo["regDate"], "modDate": userinfo["modDate"]}
-    except Exception as e:
+    except JWTError as e:
         print(f"Decode Error: {e}")
         return {"status": False, "msg": "유효하지 않은 세션입니다."}
     
@@ -243,3 +244,20 @@ def name(request:Request):
     except JWTError as e :
         print(f"실패원인: {e}")
         return {"status": False, "msg": "안되잖아"}
+
+
+class searchModel(BaseModel):
+    search:str = Field(..., title="게시글넘버", description="게시글넘버 입니다.")
+
+@app.post("/searchList")
+def read_root(item:searchModel):
+    sql = f'''
+    select b.no, b.title, u.name
+    from test.board as b
+    inner Join test.user as u
+    on(b.user_email = u.email)
+    where b.delYn = 0
+    and b.title like "%{item.search}%";
+    '''
+    data = findAll(sql)
+    return {"status": True, "boardList" : data}

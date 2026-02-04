@@ -29,7 +29,7 @@ const AuthProvider = ({ children }) => {
   }
 
   const checkAuth = () => {
-    return localStorage.getItem("user") ? true : false
+    return localStorage.getItem("user")? true : false
   }
 
   useEffect(() => {
